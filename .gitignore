@@ -1,0 +1,7 @@
+*.csv
+__pycache__/
+*.pyc 
+.vscode/
+*.json
+downsampler
+libLAS/
