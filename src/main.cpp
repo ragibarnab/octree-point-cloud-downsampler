@@ -5,12 +5,13 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <memory>
 
 using namespace std;
 
 // my short and dirty downsampling technique: recursively collect the stored points of the octree until a certain target depth of the structure
 template<typename T>
-void downsample(Octree<T>* octree, vector<Point<T>*>& out, int target_depth, int depth=0)
+void downsample(std::shared_ptr<Octree<T>> octree, vector<Point<T>>& out, int target_depth, int depth=0)
 {
     if (!octree)
         return;
@@ -28,7 +29,7 @@ int main(int argc, char const *argv[])
 {
     // center of root boundary at origin, with 10 meters out from center in x,y,z
     Boundary<float> b = Boundary<float>(0,0,0,10.0,10.0,10.0);
-    Octree<float>* ot = new Octree<float>(b);
+    std::shared_ptr<Octree<float>> ot = std::make_shared<Octree<float>>(b);
 
     // inserting points one by one into the tree
     ifstream infil("input.csv");
@@ -44,14 +45,14 @@ int main(int argc, char const *argv[])
             float y = stof(temp);
             getline(infil, temp);
             float z = stof(temp);
-            Point<float>* p = new Point<float>(x,y,z);
+            Point<float> p = Point<float>(x,y,z);
             ot->insert(p);
         }
     }
     infil.close();
 
     // create a vector to store the downsampled output, prints size of the output
-    vector<Point<float>*> downsampled;
+    vector<Point<float>> downsampled;
     downsample(ot, downsampled, 8);     // depth: parameter to tune                            
 
     // write output into a file on disk
@@ -62,7 +63,7 @@ int main(int argc, char const *argv[])
         outfile << buffer;
         for (int i = 0; i < downsampled.size(); i++)
         {
-            Point<float> p = *downsampled.at(i);
+            Point<float> p = downsampled.at(i);
             snprintf(buffer, sizeof(buffer), "%f,%f,%f\n", p.x, p.y, p.z);
             outfile << buffer;
         }

@@ -1,4 +1,5 @@
 #include <vector>
+#include <memory>
 // octree implementation 
 
 #ifndef OCTREE_HPP
@@ -11,9 +12,8 @@ class Octree
         int capacity = 1;          // capacity: parameter to tune
         bool divided = false;
         Boundary<T> boundary;
-        std::vector<Point<T>*> points;
-        Octree<T>* children[8];
-
+        std::vector<Point<T>> points;
+        std::shared_ptr<Octree<T>> children[8];
 
         Octree(Boundary<T> boundary);
         // divides the current octree's boundary into octants, 
@@ -21,7 +21,7 @@ class Octree
         void subdivide();
         
         // recursive insertion method
-        bool insert(Point<T>* p);
+        bool insert(Point<T> p);
 };
 
 #endif

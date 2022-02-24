@@ -1,6 +1,7 @@
 #include "point.hpp"
 #include "boundary.hpp"
 #include "octree.hpp"
+#include <memory>
 
 
 template<typename T>
@@ -39,8 +40,7 @@ void Octree<T>::subdivide()
         else
             temp.center.z = this->boundary.center.z + temp.height;
         
-        this->children[i] = new Octree<T>(temp);
-
+        this->children[i] = std::make_shared<Octree<T>>(temp);
     }
 
     this->divided = true;
@@ -49,9 +49,9 @@ void Octree<T>::subdivide()
         
 // recursive insertion method
 template<typename T>
-bool Octree<T>::insert(Point<T>* p)
+bool Octree<T>::insert(Point<T> p)
 {
-    if (!this->boundary.contains(*p))
+    if (!this->boundary.contains(p))
         return false;
     if (points.size() < this->capacity)
     {
