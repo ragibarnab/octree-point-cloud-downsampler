@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <chrono>
+#include <iomanip>
 
 using namespace std;
 
@@ -32,6 +34,7 @@ int main(int argc, char const *argv[])
     std::shared_ptr<Octree<float>> ot = std::make_shared<Octree<float>>(b);
 
     // inserting points one by one into the tree
+    int input_size = 0;
     ifstream infil("input.csv");
     if (infil.is_open())
     {
@@ -47,26 +50,32 @@ int main(int argc, char const *argv[])
             float z = stof(temp);
             Point<float> p = Point<float>(x,y,z);
             ot->insert(p);
+            input_size++;
         }
     }
     infil.close();
 
-    // create a vector to store the downsampled output, prints size of the output
+    // downsample
     vector<Point<float>> downsampled;
-    downsample(ot, downsampled, 8);     // depth: parameter to tune                            
+    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
+    downsample(ot, downsampled, 9);     // depth: parameter to tune         
+    chrono::steady_clock::time_point end = chrono::steady_clock::now();
+
+    // write out performance 
+    auto runtime_ms = chrono::duration_cast<chrono::milliseconds>(end - begin).count();
+    cout << "Downsampling runtime = " << runtime_ms << "[ms]" << endl;
+    int output_size = (int) downsampled.size();
+    float percent_downsampled = (1 - ((float) output_size / (float) input_size)) * 100;
+    cout << "Downsampling rate = " << setprecision(4) << percent_downsampled << " %" << endl;
+                   
 
     // write output into a file on disk
     ofstream outfile("output.csv");
     if (outfile.is_open())
     {
-        char buffer[100] = "x,y,z\n";
-        outfile << buffer;
-        for (int i = 0; i < downsampled.size(); i++)
-        {
-            Point<float> p = downsampled.at(i);
-            snprintf(buffer, sizeof(buffer), "%f,%f,%f\n", p.x, p.y, p.z);
-            outfile << buffer;
-        }
+        outfile << "x,y,z" << endl;
+        for (Point<float> p: downsampled)
+            outfile << p.x << ',' << p.y << ',' << p.z << endl;
     }
     outfile.close();
     return 0;
