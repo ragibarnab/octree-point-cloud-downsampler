@@ -1,6 +1,13 @@
 # octree-point-cloud-downsampler
 A short project for downsampling point clouds using an octree.
 
+
+## Instructions
+
+After cloning this repo, run ``$ make`` in the directory. This should produce an executable named ``downsampler``. 
+
+Simpy run the executable in the terminal, for example ``$ ./downsampler``. It will look for ``input.csv`` in the current directory and downsample it to produce ``output.csv``.
+
 ## Results 
 ![result](result.gif)
 
